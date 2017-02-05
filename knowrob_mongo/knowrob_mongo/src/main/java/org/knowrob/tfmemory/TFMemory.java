@@ -358,6 +358,14 @@ public class TFMemory {
 		return out;
 	}
 
+	public StampedTransform lookupTransform(String targetFrameID, String sourceFrameID) {
+		
+		Time latest = getLatestTime(15);
+		return lookupTransform(targetFrameID, sourceFrameID, latest);
+
+	}
+
+	
 	/**
 	 * Check if there are transforms for this time and this frame in the buffer,
 	 * try to load from DB otherwise (-> use DB only when needed)
@@ -441,7 +449,70 @@ public class TFMemory {
 		return res;
 	}
 
+	private Time getLatestTime(int n) {
 
+		DBCollection coll = db.getCollection(tfTableName);
+
+		// read only transforms
+		DBObject cols  = new BasicDBObject();
+		cols.put("transforms",  1);
+
+		DBCursor cursor = coll.find().sort(new BasicDBObject("transforms.header.stamp", -1));
+		cursor = cursor.limit(n);
+
+		Time latestTime = null;
+		boolean isFirst = true;
+		try {
+			while(cursor.hasNext()) {
+				DBObject current = cursor.next();
+
+				if(isFirst)
+				{
+					isFirst = false;
+
+					BasicDBObject db_transform = (BasicDBObject)((BasicDBList)current.get("transforms")).get(0);
+
+					// resolve the frame ID's
+					String childFrameID = assertResolved("",
+							getFrameName(db_transform.get("child_frame_id")));
+					String frameID = assertResolved("",
+							getFrameName(((BasicDBObject) db_transform.get("header")).get("frame_id")));
+
+					boolean errorExists = false;
+					if (childFrameID == frameID) {
+						System.err.println("TF_SELF_TRANSFORM: Ignoring transform with frame_id and child_frame_id  \"" + childFrameID + "\" because they are the same");
+						errorExists = true;
+					}
+
+					if (childFrameID == "/") { //empty frame id will be mapped to "/"
+						System.err.println("TF_NO_CHILD_FRAME_ID: Ignoring transform because child_frame_id not set ");
+						errorExists = true;
+					}
+
+					if (frameID == "/") { //empty parent id will be mapped to "/"
+						System.err.println("TF_NO_FRAME_ID: Ignoring transform with child_frame_id \"" + childFrameID + "\" because frame_id not set");
+						errorExists = true;
+					}
+
+					if (errorExists) return null;
+
+
+					// add frames to map
+					Frame childFrame  = lookupOrInsertFrame(childFrameID);
+					Frame parentFrame = lookupOrInsertFrame(frameID);
+
+
+					TransformStorage tf = new TransformStorage().readFromDBObject(db_transform, childFrame, parentFrame);
+					long timestamp = tf.getTimeStamp();
+					latestTime = new Time(timestamp / 1E9); 
+				}
+			}
+		} finally {
+			cursor.close();
+		}
+		
+		return latestTime;
+	}
 
 
 

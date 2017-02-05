@@ -32,6 +32,7 @@
 
 :- module(knowrob_mongo_tf,
     [
+      mng_lookup_transform/3,
       mng_lookup_transform/4,
       mng_lookup_position/4,
       mng_transform_pose/5,
@@ -88,6 +89,15 @@ mng_lookup_transform(Target, Source, TimePoint, Transform) :-
 
   mongo_interface(DB),
   jpl_call(DB, 'lookupTransform', [Target, Source, TimePoint], StampedTransform),
+  % Make sure transform is not null!
+  not( jpl_null(StampedTransform) ),
+
+  jpl_call(StampedTransform, 'getMatrix4', [], TransformMatrix4d),
+  knowrob_coordinates:matrix4d_to_list(TransformMatrix4d, Transform).
+
+mng_lookup_transform(Target, Source, Transform) :-
+  mongo_interface(DB),
+  jpl_call(DB, 'lookupTransform', [Target, Source], StampedTransform),
   % Make sure transform is not null!
   not( jpl_null(StampedTransform) ),
 

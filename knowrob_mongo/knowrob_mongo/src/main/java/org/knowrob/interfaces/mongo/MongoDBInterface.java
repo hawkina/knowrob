@@ -112,6 +112,10 @@ public class MongoDBInterface {
 		return(mem.lookupTransform(targetFrameId, sourceFrameId, t));
 	}
 
+	public StampedTransform lookupTransform(String targetFrameId, String sourceFrameId) {
+		return(mem.lookupTransform(targetFrameId, sourceFrameId));
+	}
+
 	/**
 	 * Wrapper around the transformPose method of the TFMemory class
 	 *
