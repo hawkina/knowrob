@@ -35,6 +35,7 @@
       mng_db/1,
       mng_republisher/1,
       mng_timestamp/2,
+      mng_query_latest/3,
       mng_query_latest/4,
       mng_query_latest/5,
       mng_query_earliest/4,
@@ -164,6 +165,13 @@ mng_db_cursor(Collection, Pattern, DBCursor) :-
 %
 mng_query_latest(Collection, DBObj, TimeKey, TimeValue) :-
   mng_query_latest(Collection, DBObj, TimeKey, TimeValue, []).
+
+mng_query_latest(Collection, DBObj, TimeKey) :-
+  mongo_interface(DB),
+  jpl_call(DB, 'query', [Collection], DBCursor),
+  not(DBCursor = @(null)),
+  mng_descending(DBCursor, TimeKey, DBCursorDescending),
+  mng_read_cursor(DBCursorDescending, DBObj).
 
 mng_query_latest(Collection, DBObj, TimeKey, TimeValue, Pattern) :-
   mng_db_cursor(Collection, [[TimeKey, '<', date(TimeValue)]|Pattern], DBCursor),

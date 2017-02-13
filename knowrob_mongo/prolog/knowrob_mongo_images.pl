@@ -32,6 +32,7 @@
 
 :- module(knowrob_mongo_images,
     [
+        mng_image_latest/1,
         mng_image_latest/2,
         mng_image_base64/2,
         mng_compresssed_image_base64/2
@@ -47,6 +48,9 @@
 
 mng_image_latest(Time, DBObj) :-
   mng_query_latest('kinect_head_rgb_image_color', one(DBObj), 'header.stamp', Time).
+
+mng_image_latest(DBObj) :-
+  mng_query_latest('kinect_head_rgb_image_color', one(DBObj), 'header.stamp').
 
 mng_image_base64(DBObj, Base64) :-
   mng_republisher(_),
