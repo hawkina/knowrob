@@ -161,6 +161,8 @@ public class JSONPrologNode extends AbstractNodeMain {
 					synchronized(jpl.Query.class) {
 						ThreadedQuery currentQuery = JSONQuery.makeQuery(request.getQuery());
 						String currentQueryId = request.getId();
+
+						System.out.println("querry processing:" + currentQuery.getQueryObject().toString());
 						
 						// Add the query to the thread pool
 						queryThreadPool.submit(currentQuery);
@@ -213,6 +215,8 @@ public class JSONPrologNode extends AbstractNodeMain {
 						
 						ThreadedQuery currentQuery = new ThreadedQuery(
 								"expand_goal(("+userQuery+"),_Q), call(_Q)");
+
+						System.out.println("querry processing:" + userQuery);
 						String currentQueryId = request.getId();
 						
 						// Add the query to the thread pool

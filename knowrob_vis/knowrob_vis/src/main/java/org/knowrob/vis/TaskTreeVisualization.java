@@ -121,9 +121,9 @@ public class TaskTreeVisualization extends AbstractNodeMain {
 			t.setId(i);
                         t.setParent(i);
 			t.setType(tasks[i][3] );
-			t.setTip("ID: " + tasks[i][1] + ", Goal: " + tasks[i][0] +
+			/*t.setTip("ID: " + tasks[i][1] + ", Goal: " + tasks[i][0] +
 				", Type: " + tasks[i][3] + ", Start: " + tasks[i][4] + 
-				", End: " + tasks[i][5]);
+				", End: " + tasks[i][5]);*/
 
 			// checking if the current task should be visualized in the tree
 			boolean isVisualizationDesired = true;
